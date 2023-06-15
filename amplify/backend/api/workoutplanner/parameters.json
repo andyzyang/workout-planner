@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "workoutplanner",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authworkoutplannera3463a37",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+    "appName": "workoutplanner",
+    "roleName": "pinpointLambdaRole7c11dac4",
+    "cloudformationPolicyName": "cloudformationPolicy7c11dac4",
+    "cloudWatchPolicyName": "cloudWatchPolicy7c11dac4",
+    "pinpointPolicyName": "pinpointPolicy7c11dac4",
+    "authPolicyName": "pinpoint_amplify_7c11dac4",
+    "unauthPolicyName": "pinpoint_amplify_7c11dac4",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    }
+}

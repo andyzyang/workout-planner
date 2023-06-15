@@ -1,0 +1,134 @@
+# https://docs.amplify.aws/cli/graphql-transformer/overview
+
+# Union types and interfaces are not supported as field types https://github.com/aws-amplify/amplify-cli/issues/6537
+
+type ExerciseCategory
+  @model
+  @key(fields: ["id"])
+  @key(
+    name: "categoriesByName"
+    fields: ["name"]
+    queryField: "categoriesByName"
+  )
+  @key(
+    name: "categoriesByParent"
+    fields: ["parentCategoryId"]
+    queryField: "categoriesByParent"
+  )
+  @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  name: String!
+  parentCategoryId: ID
+  parentCategory: ExerciseCategory @connection(fields: ["parentCategoryId"])
+  exercises: [ExerciseCategoryExercise!]!
+    @connection(keyName: "exercisesByExerciseCategory", fields: ["id"])
+  note: String
+}
+
+type Exercise
+  @model
+  @key(fields: ["id"])
+  @key(name: "exercisesByName", fields: ["name"], queryField: "exercisesByName")
+  @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  name: String!
+  isStrength: Boolean!
+  categories: [ExerciseCategoryExercise!]!
+    @connection(keyName: "exerciseCategoriesByExercise", fields: ["id"])
+  routines: [RoutineExercise!]!
+    @connection(keyName: "routinesByExercise", fields: ["id"])
+  note: String
+}
+
+# Create a join model for the many-to-many relationship between categories and exercises.
+# Queries disabled because we can query through ExerciseCategory.exercises or Exercise.categories
+# See https://docs.amplify.aws/cli/graphql-transformer/connection#many-to-many-connections
+type ExerciseCategoryExercise
+  @model(queries: null)
+  @key(
+    name: "exercisesByExerciseCategory"
+    fields: ["exerciseCategoryId", "exerciseId"]
+    queryField: "exercisesByExerciseCategory"
+  )
+  @key(
+    name: "exerciseCategoriesByExercise"
+    fields: ["exerciseId", "exerciseCategoryId"]
+    queryField: "exerciseCategoriesByExercise"
+  )
+  @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  exerciseCategoryId: ID!
+  exerciseId: ID!
+  exerciseCategory: ExerciseCategory!
+    @connection(fields: ["exerciseCategoryId"])
+  exercise: Exercise! @connection(fields: ["exerciseId"])
+}
+
+# Create a join model for the many-to-many relationship between routines and exercises.
+# Queries disabled because we can query through Routine.exercises or Exercise.routines
+# See https://docs.amplify.aws/cli/graphql-transformer/connection#many-to-many-connections
+type RoutineExercise
+  @model(queries: null)
+  @key(name: "exercisesByRoutine", fields: ["routineId", "exerciseId"])
+  @key(name: "routinesByExercise", fields: ["exerciseId", "routineId"])
+  @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  routineId: ID!
+  exerciseId: ID!
+  routine: Routine! @connection(fields: ["routineId"])
+  exercise: Exercise! @connection(fields: ["exerciseId"])
+}
+
+type Workout
+  @model
+  @key(fields: ["id"])
+  @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  # the sets performed during the workout
+  sets: [Set!]! @connection(keyName: "setsByWorkout", fields: ["id"])
+  note: String
+}
+
+type Routine
+  @model
+  @key(fields: ["id"])
+  @key(name: "routinesByName", fields: ["name"], queryField: "routinesByName")
+  @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  name: String!
+  exercises: [RoutineExercise!]!
+    @connection(keyName: "exercisesByRoutine", fields: ["id"])
+  note: String
+}
+
+type Set
+  @model
+  @key(fields: ["id"])
+  @key(
+    name: "setsByExercise"
+    fields: ["exerciseId"]
+    queryField: "setsByExercise"
+  )
+  @key(
+    name: "setsByWorkout"
+    fields: ["workoutId"]
+    queryField: "setsByWorkout"
+  )
+  @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  exerciseId: ID!
+  exercise: Exercise! @connection(fields: ["exerciseId"])
+  workoutId: ID!
+  workout: Workout! @connection(fields: ["workoutId"])
+  executionDate: String!
+  note: String
+
+  # quantifiers
+  # isStrength = True
+  weightLbs: Float
+  reps: Float
+
+  # isStrength = False
+  distanceMiles: Float
+  durationSecs: Float
+}
